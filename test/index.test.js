@@ -2,14 +2,37 @@
 /* globals describe, it */
 
 "use strict";
-const hosonto = require("../lib/hosonto-server");
+//const server; //= require("./server");
 const chai = require("chai");
 const expect = chai.expect;
-chai.config.includeStack = true;
+// chai.config.includeStack = true;
+const chaiHttp = require("chai-http");
+const sinon = require("sinon");
+const config = require("../lib/config");
+chai.use(chaiHttp);
 
-describe("Loaded successfully", function () {
-  it("should load module", function (done) {
-    expect(hosonto).to.exist;
+var testserver;
+
+describe("Running the Server", function () {
+  beforeEach(function () {
+    //testserver = require("./server");
+  });
+
+  afterEach(function () {
+    testserver = null;
+  });
+  //   var fake = sinon.fake.returns(
+  //     console.error("e" + sinon.fake.callCount + "\n\n")
+  //   );
+  //   // sinon.restore();
+  //   sinon.replace(console, "log", fake);
+  it("should start http server successfully", function (done) {
+    //expect(testserver).to.exist;
     done();
   });
 });
+
+// afterEach(() => {
+//   // Restore the default sandbox here
+//   sinon.restore();
+// });

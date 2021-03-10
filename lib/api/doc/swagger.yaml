@@ -1,0 +1,262 @@
+openapi: "3.0.0"
+info:
+  version: 2.0.0
+  title: Hosonto Fullstack Framework
+  license:
+    name: MIT
+    url: "https://tldrlegal.com/license/mit-license"
+servers:
+  - url: https://localhost/
+  
+paths:
+  /autoLoadData:
+    post:
+      summary: Automatically load relevant information from Database
+      operationId: autoLoadData
+      tags:
+        - Auto Data Handler
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/sessionParameters'
+  
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sessionParameters"
+              examples:
+                table-only:
+                  $ref: '#/components/examples/Table-only'
+                table-having-field-filters:
+                  $ref: '#/components/examples/Table-having-field-filters'
+                table-having-pagination:
+                  $ref: '#/components/examples/Table-having-pagination-sorting'
+                table-having-BI-queries:
+                  $ref: '#/components/examples/Table-having-BI-queries'
+        '403':
+          description: Outside access not permitted. Call from inside server methods.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '500':
+          description: unexpected server error
+          content:
+            application/json:
+              schema: 
+                type: string
+        '520':
+          description: Server logic error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sessionParameters'
+                description: "__Error returns the error message."
+  
+      
+  /autoLoadData/{table}:
+    get:
+      summary: Get rows for a specific table
+      tags:
+        - Auto Data Handler
+      parameters:
+        - name: table
+          in: path
+          required: true
+          description: Table name 
+          schema:
+            type: string
+        - name: fieldName
+          in: query
+          description: Optinal fieldname to narrow search results (it could be in the second path parameter too)
+          schema:
+            type: string
+        - name: fieldValue
+          in: query
+          description: Optinal value of the mentioned field to narrow search results (it could be in the third path parameter too)
+          schema:
+            type: string    
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tables"
+        '403':
+          description: Outside access not permitted. Call from inside server methods.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /executeEvent:
+    post:
+      summary: Execute a server method and get the response
+      operationId: executeEvent
+      tags:
+        - Execute Event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/sessionParameters'
+  
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sessionParameters"
+              examples:
+                sample-event:
+                  $ref: '#/components/examples/Sample-event-execution'
+        '403':
+          description: Forbidden access. May need authentication.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '500':
+          description: unexpected server error
+          content:
+            application/json:
+              schema: 
+                type: string
+        '520':
+          description: Server logic error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sessionParameters'
+                description: "__Error returns the error message."
+components:
+  schemas:
+    Tables:
+      type: object
+      required:
+        - _id
+        - __SessionId
+      properties:
+        _id:
+          type: object
+          format: int64
+        __SessionId:
+          type: string
+        customfield:
+           description: >
+             Any desired fieldname with 
+               * type: the desired type.
+               * security: ('public' | PRIVATE or 'server_side_access_only' | 'owner_only' or RESTRICTED)
+               
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  
+    sessionParameters:
+      type: object
+      description: "passing all required and meta-data information to and from server"
+      properties:
+        __SessionId:
+          type: string
+          description: "session identifier for reconciling multiple requests with a single session."
+        __EventName: 
+          type: string
+          description: "Event name to be executed in the server, Applicable for executeEvent endpoint."
+        __RemoteFunction: 
+          type: string
+          description: "Server function name, required for code-on-demand calling of server functions"
+        __IP: 
+          type: string
+          description: 'Will be stored when configured.'
+        __Status:
+          type: string
+          description: "Server return status message for global application context."
+        __Error:
+          type: string
+          description: "Server return error message for global application context."
+        _Status:
+          type: string
+          description: "Server return status message for local application context."
+        _Error:
+          type: string
+          description: "Server return error message for local application context."
+        
+      additionalProperties:
+        type: string
+        description: >
+                All dynamic information and their string converted values.
+                 ## The specific formats are:
+                   * {tablename}_TABLE: for mentioning whole table data in array format where {tablename} represents server data table.
+                   * {tablename}_FIELD _{fieldname}: Where tablename represent data table and fieldname represent column name.
+                   * {tablename}_search: Represents search query for the data table {tablename}.
+  examples:       # Multiple examples
+      Table-only:         # Distinct name
+        value:     # Example value
+          todos_TABLE: ""
+        summary: A sample to load a single table 
+      Table-having-field-filters: 
+        value: 
+          todos_TABLE: ""
+          todos_FIELD_: {"_id": "5d6f18c5a522351adc57b868"}
+        summary: A sample to load table filtering by some fields
+      Table-having-search-filters: 
+        value: 
+          todos_TABLE: ""
+          todos__search: {"title": {"$regex":"Your job*"}}
+        summary: A sample to load table filtering by some fields
+      Table-having-pagination-sorting: 
+        value: 
+          todos_TABLE: ""
+          todos__currentPage: 2  # move to your desired page
+          todos__pageLimit: 2  # sets the number of rows per page
+          todos__sort: {"username":1, "avatar":-1}  # sets sorting parameter, 1 - ascending, -1: descending
+        summary: A sample to load table with pagination
+        description: By default a maximum of 100 rows will be returned if no pagination is set.
+      Table-having-BI-queries: 
+        value: 
+          todos_TABLE: ""
+          todos__bi: "[[{\"$match\": {\"username\": {\"$gt\":\"md\"}}},{\"$count\": \"username\"}], [{\"$count\": \"username\"}]]"  
+        summary: A sample to load table with BI queries (aggregate for mongoDB)
+        description: The results are returned in {TABLE}__bi_results parameter
+      Sample-event-execution:  
+        value:
+          __EventName: "BL.Hello.getGreetings"
+          username: "Your name(native language too)"
+        summary: Sample event calling and responses
+        description: >
+                     Returns 
+                     
+                     * greetings
+                       
+                       Localized "hello {user}" from server 
+                     * __Status
+                       
+                       Status response
+                     * __Error
+                     
+                       Errors (if any)"
+                     * {Any other custom parameters}
+                     
+                       If defined in the logic, such as _status, _error for local error messages at the helloworld application.

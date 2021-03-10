@@ -4,3 +4,4 @@ npm-debug.log
 .npmrc
 package-lock*
 yarn.lock*
+*debug*
