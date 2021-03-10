@@ -32,7 +32,7 @@ describe("Concrete Accessor Tests ", function () {
 
   let accessor;
   beforeEach(function () {
-    accessor = new MongoAccessHelper(mongoose);
+    accessor = new MongoAccessHelper();
   });
 
   afterEach(function () {
