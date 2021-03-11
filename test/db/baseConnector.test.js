@@ -13,13 +13,24 @@ const assertArrays = require("chai-arrays");
 chai.use(assertArrays);
 
 var Intrface = require("../../lib/util/Intrface.js");
-// var BaseConnector = require("../generic/baseConnector.js");
+var {
+  sessionParameterTable,
+  counters,
+} = require("../../lib/db/mongo/StateModels")();
 var log = require("../../lib/log/")(module);
 const util = require("util");
 let testData = require("../test-data/tables");
 
 var MockConnector = function (dbHelper) {
   BaseConnector.apply(this, [this, dbHelper]);
+
+  this.getSessionParameterTable = function () {
+    return sessionParameterTable;
+  };
+
+  this.getCounters = function () {
+    return counters;
+  };
 
   this.update = async function (tableName, query, upd, isMulti, callback) {
     var qry;
@@ -50,7 +61,7 @@ var MockConnector = function (dbHelper) {
   };
 
   this.findDefault = function (context, query, resultCallback) {
-    context.getSessionParameterTable().find(query, resultCallback);
+    resultCallback(null, testData.test_table);
   };
 
   this.find = function (tableName, query, fields, isMulti, params, callback) {
@@ -63,7 +74,7 @@ var MockConnector = function (dbHelper) {
   };
 
   this.getNextSeq = function (name, callback) {
-    callback(null, 1);
+    callback(null, { seq: 1 });
   };
 };
 
@@ -84,9 +95,6 @@ describe("Baseconnector Abstract function Tests ", function () {
     var filterStub = sinon.stub(accessor, "filterColumns");
     filterStub.returns(testData.test_table);
     baseConnector = new MockConnector(accessor);
-    baseConnector.loadAutoTablePromise = util.promisify(
-      baseConnector.loadAutoTable
-    );
   });
 
   afterEach(function () {
@@ -128,11 +136,48 @@ describe("Baseconnector Abstract function Tests ", function () {
   });
 
   it("should be able to autoLoadTable call", async () => {
-    let me = this;
+    baseConnector.loadAutoTablePromise = util.promisify(
+      baseConnector.loadAutoTable
+    );
     let params = { test_TABLE: [] };
-
     let res = await baseConnector.loadAutoTablePromise(params);
-    console.log("I am rest:" + res);
+
+    expect(testData.test_table).to.equalTo(res.test_TABLE);
+    return;
+  });
+
+  it("should be able to receive error for invalid sessionId for loadAutoParams", async () => {
+    baseConnector.loadAutoParamsPromise = util.promisify(
+      baseConnector.loadAutoParams
+    );
+    let params = { test_TABLE: [] };
+    try {
+      let res = await baseConnector.loadAutoParamsPromise(params);
+    } catch (err) {
+      expect(err.status).to.equal(500);
+    }
+    return;
+  });
+
+  it("should be able to receive error for invalid sessionId", async () => {
+    baseConnector.loadParamsPromise = util.promisify(
+      baseConnector.loadParamsForValidSessionId
+    );
+    let params = { test_TABLE: [] };
+    try {
+      let res = await baseConnector.loadParamsPromise(params);
+    } catch (err) {
+      expect(err.status).to.equal(500);
+    }
+    return;
+  });
+
+  it("should be able to autoLoadParams call", async () => {
+    baseConnector.loadAutoParamsPromise = util.promisify(
+      baseConnector.loadAutoParams
+    );
+    let params = { __SessionId: 1, test_TABLE: [] };
+    let res = await baseConnector.loadAutoParamsPromise(params);
 
     expect(testData.test_table).to.equalTo(res.test_TABLE);
     return;
