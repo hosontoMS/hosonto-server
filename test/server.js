@@ -95,21 +95,21 @@ app.use(passport.session());
 class BusinessLogicVault {
   constructor(app, ppt, log) {
     this.passport = ppt;
-    this.continue = (params) => {
-      return params;
+    this.continue = ([params], finish) => {
+      finish(null, params);
     };
     this.continue.allowGlobal = true;
 
-    this.continueRemote = (params) => {
+    this.continueRemote = ([params]) => {
       return params;
     };
     this.continueRemote.allowRemote = true;
 
-    this.authorizedContinue = (params) => {
+    this.authorizedContinue = ([params]) => {
       return params;
     };
     //   static continue.allowGlobal = true;
-    this.login = async (params, req, res) => {
+    this.login = async ([params, req, res], finish) => {
       log.debug("auth local\n\n");
       log.debug("passport local " + JSON.stringify(ppt));
       req.body.username = "abc";
@@ -125,7 +125,7 @@ class BusinessLogicVault {
         //finish(params);
         //   done();
       });
-      return params;
+      finish(null, params);
     };
     this.login.allowGlobal = true;
   }

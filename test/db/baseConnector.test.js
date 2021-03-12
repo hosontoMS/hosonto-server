@@ -32,16 +32,17 @@ var MockConnector = function (dbHelper) {
     return counters;
   };
 
+  this.updateSessionparamTable = async function (query, upd, callback) {
+    let res = await callback(null, { update: `${query} :: ${upd}` });
+    return res;
+  };
+
   this.update = async function (tableName, query, upd, isMulti, callback) {
     var qry;
-    if (arguments.length <= 3) {
-      // Only supplied context, query, upd and callback
-      // used default table for update which is SessionParamtable
-      this.updateDefault(this, arguments[0], arguments[1], arguments[2]);
-    } else {
+    if (callback) {
       let res = await callback(null, { update: `${query} :: ${upd}` });
       return res;
-    }
+    } else return [];
   };
 
   this.findUser = function (query, callback) {
@@ -57,7 +58,8 @@ var MockConnector = function (dbHelper) {
   };
 
   this.findSessionParam = function (context, query, callback) {
-    context.getSessionParameterTable().find(query, callback);
+    // context.getSessionParameterTable().find(query, callback);
+    callback(null, { __SessionId: 1 });
   };
 
   this.findDefault = function (context, query, resultCallback) {
@@ -180,6 +182,25 @@ describe("Baseconnector Abstract function Tests ", function () {
     let res = await baseConnector.loadAutoParamsPromise(params);
 
     expect(testData.test_table).to.equalTo(res.test_TABLE);
+    return;
+  });
+
+  it("should be able to saveAutoParams call", async () => {
+    let newRow = { id: 3, user: "Third", name: "master" };
+    // sinon.stub(baseConnector, "update").returns([newRow]);
+    // var filterStub = sinon.stub(accessor, "filterColumns");
+
+    baseConnector.saveAutoParamsPromise = util.promisify(
+      baseConnector.saveAutoParams
+    );
+    let params = { __SessionId: 1, test_TABLE: [newRow] };
+    try {
+      let res = await baseConnector.saveAutoParamsPromise(params);
+
+      expect(testData.test_table).to.equalTo(res.test_TABLE);
+    } catch (err) {
+      log.debug("Error:: " + JSON.stringify(err));
+    }
     return;
   });
 });

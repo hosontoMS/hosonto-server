@@ -74,6 +74,7 @@ describe("Test API Calls", function () {
     );
 
     expect(result.status).to.equal(200);
+    return;
   });
 
   it("should give error for unauthorized executeEvent", async () => {
