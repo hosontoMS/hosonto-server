@@ -139,7 +139,7 @@ class MockConnection {
       callback(null, ps);
     });
   }
-  saveAutoParams(params, callback) {
+  saveAutoParams(context, params, callback) {
     callback(null, params);
   }
   loadAutoTable(params, callback) {

@@ -24,6 +24,7 @@ let testData = require("../test-data/tables");
 var MockConnector = function (dbHelper) {
   BaseConnector.apply(this, [this, dbHelper]);
 
+  this.connector = this;
   this.getSessionParameterTable = function () {
     return sessionParameterTable;
   };
@@ -194,13 +195,9 @@ describe("Baseconnector Abstract function Tests ", function () {
       baseConnector.saveAutoParams
     );
     let params = { __SessionId: 1, test_TABLE: [newRow] };
-    try {
-      let res = await baseConnector.saveAutoParamsPromise(params);
+    let res = await baseConnector.saveAutoParamsPromise(baseConnector, params);
 
-      expect(testData.test_table).to.equalTo(res.test_TABLE);
-    } catch (err) {
-      log.debug("Error:: " + JSON.stringify(err));
-    }
+    expect(res.test_TABLE).to.equalTo([newRow]);
     return;
   });
 });
