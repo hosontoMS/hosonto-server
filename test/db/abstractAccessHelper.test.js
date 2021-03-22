@@ -15,11 +15,11 @@ var { dbSecurity } = require("../../lib/util/common.js");
 // var BaseConnector = require("../generic/baseConnector.js");
 // var log = require("../../../log.js")(module, "dev_messages.log");
 // var util = require("util");
-// let config = require("../../../config");
+let config = require("../config/");
 let testData = require("../test-data/tables");
 
 var MockAccessor = function (accessLevel) {
-  AbstractAccessor.apply(this, [null, accessLevel]);
+  AbstractAccessor.apply(this, [null, accessLevel, config]);
 };
 
 Intrface.Extend(MockAccessor, AbstractAccessor);

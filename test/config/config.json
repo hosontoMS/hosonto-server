@@ -1,0 +1,5 @@
+{
+    "jwt-secret": "abcd1232",
+    "user-permission-table" : "users"
+ }
+  

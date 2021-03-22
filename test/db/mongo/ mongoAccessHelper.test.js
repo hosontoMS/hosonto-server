@@ -12,8 +12,6 @@ chai.use(assertArrays);
 chai.config.includeStack = true;
 
 var Intrface = require("../../../lib/util/Intrface.js");
-// var BaseConnector = require("../generic/baseConnector.js");
-// var util = require("util");
 let config = require("../../../lib/config");
 var log = require("../../../lib/log")(module);
 
@@ -25,11 +23,6 @@ let mongoose = require("mongoose");
 let modelDef = require("./testModel.js")(mongoose);
 
 describe("Concrete Accessor Tests ", function () {
-  // var fake = sinon.fake.returns(
-  //   console.error("e" + sinon.fake.callCount + "\n\n")
-  // );
-  // sinon.restore();
-
   let accessor;
   beforeEach(function () {
     accessor = new MongoAccessHelper();

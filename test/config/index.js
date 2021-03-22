@@ -11,6 +11,9 @@ nconf
   .argv()
   // Environment variables
   .env(["DATA_BACKEND", "MONGO_URL", "MONGO_COLLECTION", "PORT"])
+  .file({
+    file: path.join(__dirname, "config.json"),
+  })
   // Defaults
   .defaults({
     LOG_LEVEL: "trace",

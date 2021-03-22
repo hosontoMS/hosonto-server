@@ -32,5 +32,25 @@ const data = {
       _owner_id: 3,
     },
   ],
+  users: [
+    {
+      _id: "56d9bf92f9be48771d6fe5b1",
+      name: "test",
+    },
+    {
+      _id: "56d9bf92f9be48771d6fe5b2",
+      name: "John",
+    },
+  ],
+  tasks: [
+    {
+      userId: "56d9bf92f9be48771d6fe5b1",
+      task: "do stuff",
+    },
+    {
+      userId: "56d9bf92f9be48771d6fe5b2",
+      task: "fix stuff",
+    },
+  ],
 };
 module.exports = data;

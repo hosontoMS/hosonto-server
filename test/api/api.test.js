@@ -21,7 +21,7 @@ describe("Test API Calls", function () {
   beforeEach(function () {
     testData = test_table;
 
-    testserver = require("../server");
+    testserver = require("./server");
   });
 
   afterEach(function () {

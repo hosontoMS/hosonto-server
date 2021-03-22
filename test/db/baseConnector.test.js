@@ -4,6 +4,7 @@
 "use strict";
 const BaseConnector = require("../../lib/db/generic/BaseConnector");
 const AbstractAccessor = require("../../lib/db/security/AbstractAccessHelper");
+let { MongoAccessHelper } = require("../../lib/db/mongo/MongoAccessHelper");
 
 const chai = require("chai");
 const expect = chai.expect;
@@ -20,6 +21,7 @@ var {
 var log = require("../../lib/log/")(module);
 const util = require("util");
 let testData = require("../test-data/tables");
+let config = require("../config/");
 
 var MockConnector = function (dbHelper) {
   BaseConnector.apply(this, [this, dbHelper]);
@@ -72,7 +74,7 @@ var MockConnector = function (dbHelper) {
 
     //let res = await
     let res = this.getAccessAdvisor(1);
-    let resp = callback(null, { find: `${query}${res}` });
+    let resp = callback(null, testData.test_table);
     return resp;
   };
 
@@ -85,19 +87,42 @@ Intrface.Extend(MockConnector, BaseConnector);
 
 var MockAccessor = function (accessLevel) {
   AbstractAccessor.apply(this, [this, accessLevel]);
+  this.getPermittedFields = async function () {};
+
+  this.filterColumns = async function (
+    tableName,
+    rows,
+    userAdvisor,
+    ownerField,
+    sharedField,
+    idFields,
+    toBeHiddenFields
+  ) {
+    let response = rows;
+    // remove the to be hidden fields
+    return response.map((elem) =>
+      this.maskFields(elem, ownerField, idFields, toBeHiddenFields)
+    );
+  };
 };
 
 Intrface.Extend(MockAccessor, AbstractAccessor);
+let concreteAccessor = new MockAccessor(null, config);
 
 describe("Baseconnector Abstract function Tests ", function () {
   var baseConnector;
-  var accessor = new MockAccessor();
 
   beforeEach(function () {
-    sinon.stub(accessor, "getPermittedFields").returns([{}]);
-    var filterStub = sinon.stub(accessor, "filterColumns");
-    filterStub.returns(testData.test_table);
-    baseConnector = new MockConnector(accessor);
+    sinon
+      .stub(concreteAccessor, "getPermittedFields")
+      .returns([
+        ["id", "name", "val1", "val2", "val3", "task"],
+        ["_id", "val2"],
+        ["_shared_ids"],
+        ["_owner_id"],
+        ["_owner_id", "val3"],
+      ]);
+    baseConnector = new MockConnector(concreteAccessor);
   });
 
   afterEach(function () {
@@ -105,24 +130,13 @@ describe("Baseconnector Abstract function Tests ", function () {
     sinon.restore();
   });
 
-  // sinon.replace(console, "log", fake);
   it("should create the connector", function (done) {
-    log.debug("CREATE CONN");
     expect(baseConnector).to.exist;
     done();
   });
 
-  // it("should call find successfully", async () => {
-  //   let me = this;
-  //   let res;
-  //   res = await baseConnector.find("test", "qry", null, true, (e, r) => r);
-  //   expect(JSON.stringify(res)).to.equal(JSON.stringify({ find: "qry" }));
-  //   return;
-  // });
-
   it("should call update successfully", async () => {
     let me = this;
-
     let res = await baseConnector.update(
       "test",
       "qry",
@@ -132,9 +146,7 @@ describe("Baseconnector Abstract function Tests ", function () {
         return res;
       }
     );
-    expect(JSON.stringify(res)).to.equal(
-      JSON.stringify({ update: "qry :: null" })
-    );
+    expect(res).to.deep.equal({ update: "qry :: null" });
     return;
   });
 
@@ -144,8 +156,17 @@ describe("Baseconnector Abstract function Tests ", function () {
     );
     let params = { test_TABLE: [] };
     let res = await baseConnector.loadAutoTablePromise(params);
+    expect(res.test_TABLE.length).to.equal(2);
+    expect(res.test_TABLE[0]._id).to.not.equal(testData.test_table[0]._id);
+    expect(res.test_TABLE[0].val1).to.equal(testData.test_table[0].val1);
+    expect(res.test_TABLE[0].val2).to.not.equal(testData.test_table[0].val2);
+    expect(res.test_TABLE[0].val3).to.not.exist;
 
-    expect(testData.test_table).to.equalTo(res.test_TABLE);
+    expect(res.test_TABLE[1]._id).to.not.equal(testData.test_table[1]._id);
+    expect(res.test_TABLE[1].val1).to.equal(testData.test_table[1].val1);
+    expect(res.test_TABLE[1].val2).to.not.equal(testData.test_table[1].val2);
+    expect(res.test_TABLE[1].val3).to.not.exist;
+
     return;
   });
 
@@ -182,14 +203,22 @@ describe("Baseconnector Abstract function Tests ", function () {
     let params = { __SessionId: 1, test_TABLE: [] };
     let res = await baseConnector.loadAutoParamsPromise(params);
 
-    expect(testData.test_table).to.equalTo(res.test_TABLE);
+    expect(res.test_TABLE.length).to.equal(2);
+    expect(res.test_TABLE[0]._id).to.not.equal(testData.test_table[0]._id);
+    expect(res.test_TABLE[0].val1).to.equal(testData.test_table[0].val1);
+    expect(res.test_TABLE[0].val2).to.not.equal(testData.test_table[0].val2);
+    expect(res.test_TABLE[0].val3).to.not.exist;
+
+    expect(res.test_TABLE[1]._id).to.not.equal(testData.test_table[1]._id);
+    expect(res.test_TABLE[1].val1).to.equal(testData.test_table[1].val1);
+    expect(res.test_TABLE[1].val2).to.not.equal(testData.test_table[1].val2);
+    expect(res.test_TABLE[1].val3).to.not.exist;
+
     return;
   });
 
   it("should be able to saveAutoParams call", async () => {
     let newRow = { id: 3, user: "Third", name: "master" };
-    // sinon.stub(baseConnector, "update").returns([newRow]);
-    // var filterStub = sinon.stub(accessor, "filterColumns");
 
     baseConnector.saveAutoParamsPromise = util.promisify(
       baseConnector.saveAutoParams

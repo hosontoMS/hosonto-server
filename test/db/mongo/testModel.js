@@ -42,6 +42,37 @@ function TestModel(mongoose) {
   });
   mongoose.model("sys_users", UserSchema);
 
+  var UserSch = new Schema();
+  UserSch.add({
+    __SessionId: String,
+    _id: String,
+    name: {
+      type: String, // actually email of the user
+      security: dbSecurity.PUBLIC,
+    },
+    // _owner_id: Schema.Types.ObjectId,
+    // _shared_ids: [Schema.Types.ObjectId],
+    // _shared_roles: [Schema.Types.ObjectId],
+  });
+  mongoose.model("users", UserSch);
+
+  var TaskSchema = new Schema();
+  TaskSchema.add({
+    __SessionId: String,
+    user_id: {
+      type: String, // actually email of the user
+      security: dbSecurity.PRIVATE,
+    },
+    task: {
+      type: String, // actually email of the user
+      security: dbSecurity.PUBLIC,
+    },
+    _owner_id: Schema.Types.ObjectId,
+    _shared_ids: [Schema.Types.ObjectId],
+    _shared_roles: [Schema.Types.ObjectId],
+  });
+  mongoose.model("tasks", TaskSchema);
+
   return this;
 }
 
