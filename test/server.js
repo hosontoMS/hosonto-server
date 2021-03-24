@@ -70,9 +70,10 @@ exports = module.exports = async (connString) => {
     models.initialize(mongoose);
     //var dbHelper = require("./server/hosonto/db/util/dbHelper")();
     let { MongoAccessHelper } = require("../lib/db/mongo/MongoAccessHelper");
-    let dbHelper = new MongoAccessHelper({}, config);
+    let dbHelper = new MongoAccessHelper(mongoose, {}, config);
 
     var myConn = require("../lib/db/MyConnector.js")(
+      mongoose,
       connString,
       null,
       dbHelper,

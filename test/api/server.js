@@ -226,7 +226,8 @@ app.get("/home", isAuthenticated, (req, res) => {
   res.send({ code: 200, body: "HOME SWEET HOME" });
 }); // Set the default version to latest.
 
-var server = require("../../lib/hosonto-server");
+const { HosontoServer } = require("../../lib/hosonto-server");
+var server = HosontoServer();
 server.createServer(app, new MockConnection(null, config), config);
 // var logger = require("../lib/log")(module, "s_messages.log");
 

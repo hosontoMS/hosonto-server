@@ -25,7 +25,7 @@ let modelDef = require("./testModel.js")(mongoose);
 describe("Concrete Accessor Tests ", function () {
   let accessor;
   beforeEach(function () {
-    accessor = new MongoAccessHelper();
+    accessor = new MongoAccessHelper(mongoose);
   });
 
   afterEach(function () {
@@ -92,7 +92,7 @@ describe("Concrete Accessor Tests ", function () {
       ["_owner_id"]
     );
 
-    let decoded = await accessor.decodeFields(res, "256", ["id", "role"]);
+    let decoded = await accessor.unmaskFields(res, "256", ["id", "role"]);
     console.log(decoded);
     expect(decoded.id).to.exist;
     expect(decoded._owner_id).to.not.exist;

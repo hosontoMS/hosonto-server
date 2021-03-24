@@ -5,6 +5,7 @@
 const BaseConnector = require("../../lib/db/generic/BaseConnector");
 const AbstractAccessor = require("../../lib/db/security/AbstractAccessHelper");
 let { MongoAccessHelper } = require("../../lib/db/mongo/MongoAccessHelper");
+let mongoose = require("mongoose");
 
 const chai = require("chai");
 const expect = chai.expect;
@@ -17,7 +18,7 @@ var Intrface = require("../../lib/util/Intrface.js");
 var {
   sessionParameterTable,
   counters,
-} = require("../../lib/db/mongo/StateModels")();
+} = require("../../lib/db/mongo/StateModels")(mongoose);
 var log = require("../../lib/log/")(module);
 const util = require("util");
 let testData = require("../test-data/tables");

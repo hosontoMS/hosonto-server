@@ -107,13 +107,12 @@ describe("Abstract Accessor Tests ", function () {
       ["_owner_id"]
     );
 
-    let decoded = await accessor.decodeFields(res, "256", ["id", "role"]);
-    console.log(decoded);
-    expect(decoded.id).to.exist;
-    expect(decoded._owner_id).to.not.exist;
-    expect(decoded.test).to.equal("iam joy");
-    expect(decoded.id).to.equal("123");
-    expect(decoded.role).to.equal("78ab");
+    let unmasked = await accessor.unmaskFields(res, "256", ["id", "role"]);
+    expect(unmasked.id).to.exist;
+    expect(unmasked._owner_id).to.not.exist;
+    expect(unmasked.test).to.equal("iam joy");
+    expect(unmasked.id).to.equal("123");
+    expect(unmasked.role).to.equal("78ab");
     return;
   });
 });
