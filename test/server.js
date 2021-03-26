@@ -206,7 +206,8 @@ exports = module.exports = async (connString) => {
       res.send({ code: 200, body: "HOME SWEET HOME" });
     }); // Set the default version to latest.
 
-    var server = require("../lib/hosonto-server");
+    let { HosontoServer } = require("../lib/hosonto-server");
+    let server = HosontoServer();
     server.createServer(app, myConn.getInstance(), config);
     // var logger = require("../lib/log")(module, "s_messages.log");
 

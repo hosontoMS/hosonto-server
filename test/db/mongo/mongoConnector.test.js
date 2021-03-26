@@ -8,28 +8,47 @@ const expect = chai.expect;
 
 const chaiHttp = require("chai-http");
 const sinon = require("sinon");
-const config = require("../../../lib/config");
+const config = require("../../config");
 chai.use(chaiHttp);
 
 const mongoUnit = require("mongo-unit");
 const testData = require("../../test-data/tables");
-const log = require("../../../lib/log/")(module);
+const log = require("../../../lib/log/")(module, config);
 let sessionParameters, users;
 
 describe("Mongo Connector Unit test", function () {
-  sessionParameters = require("mongoose").model("sessionparameters");
-  sessionParameters.findPromise = util.promisify(sessionParameters.find);
+  var mongoose = require("mongoose");
+
+  // uncomment the models for isolated run of this test file
+  // var smodels = require("../../../lib/db/mongo/StateModels")(mongoose);
+  // var models = require("../../business_logic/modelFactory");
+  // models.initialize(mongoose);
+  // var testModel = require("./testModel")(mongoose);
+
+  var usersData;
+
   beforeEach(async () => {
+    sessionParameters = require("mongoose").model("sessionparameters");
+    sessionParameters.findPromise = util.promisify(sessionParameters.find);
+
     users = require("mongoose").model("users");
     users.findPromise = util.promisify(users.find);
+    let res = await chai
+      .request("http://localhost:" + config.get("PORT"))
+      .get("/autoLoadData/users/");
+    usersData = res.body.users_TABLE;
   });
 
   it("should receive table using autoLoadData", async () => {
+    console.log("test sss");
     const results = await chai
       .request("http://localhost:" + config.get("PORT"))
       .get("/autoLoadData/users/");
 
-    expect(results.body.users_TABLE).to.deep.equal(testData.users);
+    expect(results.body.users_TABLE[0]._id).to.not.equal(testData.users[0]._id);
+    expect(results.body.users_TABLE[0].name).to.equal(testData.users[0].name);
+    expect(results.body.users_TABLE[1]._id).to.not.equal(testData.users[1]._id);
+    expect(results.body.users_TABLE[1].name).to.equal(testData.users[1].name);
     expect(results.status).to.equal(200);
   });
 
@@ -42,16 +61,20 @@ describe("Mongo Connector Unit test", function () {
         users_TABLE: [],
       });
 
-    expect(results.body.users_TABLE).to.deep.equal(testData.users);
+    expect(results.body.users_TABLE[0]._id).to.equal(usersData[0]._id);
+    expect(results.body.users_TABLE[0].name).to.equal(testData.users[0].name);
+    expect(results.body.users_TABLE[1]._id).to.equal(usersData[1]._id);
+    expect(results.body.users_TABLE[1].name).to.equal(testData.users[1].name);
+
     expect(results.status).to.equal(200);
   });
 
   it("should receive table using autoLoadData and field", async () => {
     const results = await chai
       .request("http://localhost:" + config.get("PORT"))
-      .get("/autoLoadData/users/_id/56d9bf92f9be48771d6fe5b2");
+      .get("/autoLoadData/users/_id/" + usersData[1]._id);
 
-    expect(results.body.users_TABLE).to.deep.equal([testData.users[1]]);
+    expect(results.body.users_TABLE[0].name).to.equal(testData.users[1].name);
     expect(results.status).to.equal(200);
   });
 
@@ -68,15 +91,14 @@ describe("Mongo Connector Unit test", function () {
 
     let sessionLog = await sessionParameters.findPromise({});
 
-    expect(results.body.users_TABLE).to.deep.equal(testData.users);
+    expect(results.body.users_TABLE).to.deep.equal(usersData);
     expect(results.status).to.equal(200);
   });
 
   it("should perform table manipulation", async () => {
-    let modifiedUsers = [
-      { _id: "56d9bf92f9be48771d6fe5b1", name: "abcd" },
-      { _id: "56d9bf92f9be48771d6fe5b2", name: "efgh" },
-    ];
+    let modifiedUsers = JSON.parse(JSON.stringify(usersData));
+    modifiedUsers[0].name = "Athena";
+    modifiedUsers[1].name = "Zeus";
 
     const results = await chai
       .request("http://localhost:" + config.get("PORT"))
@@ -93,7 +115,10 @@ describe("Mongo Connector Unit test", function () {
     // test database users are modified
     let usersFromDB = await users.findPromise({});
     // deep equal does not work as mongo-unit returns an object
-    expect(JSON.stringify(usersFromDB)).to.equal(JSON.stringify(modifiedUsers));
+    expect(usersFromDB[0]._id).to.not.equal(modifiedUsers[0]._id);
+    expect(usersFromDB[1]._id).to.not.equal(modifiedUsers[1]._id);
+    expect(usersFromDB[0].name).to.equal(modifiedUsers[0].name);
+    expect(usersFromDB[1].name).to.equal(modifiedUsers[1].name);
 
     // test sessionparameters are correctly updated
     let sessionLog = await sessionParameters.findPromise({});
@@ -120,10 +145,9 @@ describe("Mongo Connector Unit test", function () {
   });
 
   it("should perform table manipulation and hide id fields", async () => {
-    let modifiedUsers = [
-      { _id: "56d9bf92f9be48771d6fe5b1", name: "abcd" },
-      { _id: "56d9bf92f9be48771d6fe5b2", name: "efgh" },
-    ];
+    let modifiedUsers = usersData;
+    modifiedUsers[0].name = "Athena";
+    modifiedUsers[1].name = "Zeus";
 
     const results = await chai
       .request("http://localhost:" + config.get("PORT"))
@@ -134,13 +158,15 @@ describe("Mongo Connector Unit test", function () {
         __UseServerSideFunction: false,
         users_TABLE: modifiedUsers,
       });
-    expect(results.body.users_TABLE).to.deep.equal(modifiedUsers);
+    expect(results.body.users_TABLE).to.not.equal(modifiedUsers);
     expect(results.status).to.equal(200);
 
     // test database users are modified
     let usersFromDB = await users.findPromise({});
-    // deep equal does not work as mongo-unit returns an object
-    expect(JSON.stringify(usersFromDB)).to.equal(JSON.stringify(modifiedUsers));
+    expect(usersFromDB[0]._id).to.not.equal(modifiedUsers[0]._id);
+    expect(usersFromDB[1]._id).to.not.equal(modifiedUsers[1]._id);
+    expect(usersFromDB[0].name).to.equal(modifiedUsers[0].name);
+    expect(usersFromDB[1].name).to.equal(modifiedUsers[1].name);
 
     // test sessionparameters are correctly updated
     let sessionLog = await sessionParameters.findPromise({});
@@ -166,10 +192,7 @@ describe("Mongo Connector Unit test", function () {
   });
 
   it("should find a record and update correctly", async () => {
-    let modifiedUsers = [
-      { _id: "56d9bf92f9be48771d6fe5b1", name: "abcd" },
-      { _id: "56d9bf92f9be48771d6fe5b2", name: "efgh" },
-    ];
+    let modifiedUsers = usersData;
     const results = await chai
       .request("http://localhost:" + config.get("PORT"))
       .post("/executeEvent")
@@ -178,11 +201,11 @@ describe("Mongo Connector Unit test", function () {
         __EventName: "BL.continue",
         __UseServerSideFunction: false,
         users_TABLE: [],
-        users_FIELD_: { _id: "56d9bf92f9be48771d6fe5b2" },
+        users_FIELD_: { _id: modifiedUsers[1]._id },
         // __SessionUser: { _id: "56d9bf92f9be48771d6fe5b2" },
       });
 
-    expect(results.body.users_TABLE).to.deep.equal([testData.users[1]]);
+    expect(results.body.users_TABLE).to.deep.equal([usersData[1]]);
     expect(results.status).to.equal(200);
 
     let selected = results.body.users_TABLE[0];
@@ -195,7 +218,7 @@ describe("Mongo Connector Unit test", function () {
         __EventName: "BL.continue",
         __UseServerSideFunction: false,
         users_TABLE: [selected],
-        users_FIELD_: { _id: "56d9bf92f9be48771d6fe5b2" },
+        users_FIELD_: { _id: modifiedUsers[1]._id },
         // __SessionUser: { _id: "56d9bf92f9be48771d6fe5b2" },
       });
 

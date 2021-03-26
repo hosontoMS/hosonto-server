@@ -5,7 +5,8 @@ if (typeof define !== "function") {
 }
 
 define(function (require, exports) {
-  var log = require("../../lib/log/")(module);
+  var config = require("../config");
+  var log = require("../../lib/log/")(module, config);
   let utils = require("../../lib/util/common");
 
   var uniqueInstance; // Private attribute that holds the single instance.

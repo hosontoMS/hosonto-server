@@ -12,8 +12,8 @@ chai.use(assertArrays);
 chai.config.includeStack = true;
 
 var Intrface = require("../../../lib/util/Intrface.js");
-let config = require("../../../lib/config");
-var log = require("../../../lib/log")(module);
+let config = require("../../config");
+var log = require("../../../lib/log")(module, config);
 
 let testData = require("../../test-data/tables");
 const {
@@ -25,7 +25,7 @@ let modelDef = require("./testModel.js")(mongoose);
 describe("Concrete Accessor Tests ", function () {
   let accessor;
   beforeEach(function () {
-    accessor = new MongoAccessHelper(mongoose);
+    accessor = new MongoAccessHelper(mongoose, null, config);
   });
 
   afterEach(function () {
@@ -87,7 +87,7 @@ describe("Concrete Accessor Tests ", function () {
         test: "iam joy",
         _owner_id: "256",
       },
-      "_owner_id",
+      "256",
       ["id", "role"],
       ["_owner_id"]
     );

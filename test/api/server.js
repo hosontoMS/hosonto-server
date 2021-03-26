@@ -8,7 +8,6 @@ var app = express(); // create our app w/ express
 //var mongoose = require("mongoose"); // mongoose for mongodb
 var util = require("util");
 var http = require("http");
-var log = require("../../lib/log")(module);
 var bodyParser = require("body-parser"); // pull information from HTML POST (express4)
 var path = require("path");
 var flash = require("connect-flash");
@@ -18,6 +17,7 @@ var testData = require("../test-data/tables.js");
 
 // configuration =================
 var config = require("../config");
+var log = require("../../lib/log")(module, config);
 
 app.use(
   session({

@@ -2,7 +2,7 @@
 /* globals describe, it */
 
 "use strict";
-const config = require("../../lib/config");
+const config = require("../config");
 const chai = require("chai");
 const chaiHttp = require("chai-http");
 

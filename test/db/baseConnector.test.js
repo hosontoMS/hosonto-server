@@ -22,10 +22,10 @@ var {
 var log = require("../../lib/log/")(module);
 const util = require("util");
 let testData = require("../test-data/tables");
-let config = require("../config/");
+let config = require("../config");
 
-var MockConnector = function (dbHelper) {
-  BaseConnector.apply(this, [this, dbHelper]);
+var MockConnector = function (dbHelper, config) {
+  BaseConnector.apply(this, [this, dbHelper, config]);
 
   this.connector = this;
   this.getSessionParameterTable = function () {
@@ -86,8 +86,8 @@ var MockConnector = function (dbHelper) {
 
 Intrface.Extend(MockConnector, BaseConnector);
 
-var MockAccessor = function (accessLevel) {
-  AbstractAccessor.apply(this, [this, accessLevel]);
+var MockAccessor = function (accessLevel, config) {
+  AbstractAccessor.apply(this, [this, accessLevel, config]);
   this.getPermittedFields = async function () {};
 
   this.filterColumns = async function (
@@ -102,7 +102,7 @@ var MockAccessor = function (accessLevel) {
     let response = rows;
     // remove the to be hidden fields
     return response.map((elem) =>
-      this.maskFields(elem, ownerField, idFields, toBeHiddenFields)
+      this.maskFields(elem, userAdvisor._owner_id, idFields, toBeHiddenFields)
     );
   };
 };
@@ -117,13 +117,13 @@ describe("Baseconnector Abstract function Tests ", function () {
     sinon
       .stub(concreteAccessor, "getPermittedFields")
       .returns([
-        ["id", "name", "val1", "val2", "val3", "task"],
-        ["_id", "val2"],
+        ["id", "name", "val1", "id2", "owner2", "task"],
+        ["_id", "id2"],
         ["_shared_ids"],
         ["_owner_id"],
-        ["_owner_id", "val3"],
+        ["_owner_id", "owner2"],
       ]);
-    baseConnector = new MockConnector(concreteAccessor);
+    baseConnector = new MockConnector(concreteAccessor, config);
   });
 
   afterEach(function () {
@@ -160,13 +160,13 @@ describe("Baseconnector Abstract function Tests ", function () {
     expect(res.test_TABLE.length).to.equal(2);
     expect(res.test_TABLE[0]._id).to.not.equal(testData.test_table[0]._id);
     expect(res.test_TABLE[0].val1).to.equal(testData.test_table[0].val1);
-    expect(res.test_TABLE[0].val2).to.not.equal(testData.test_table[0].val2);
-    expect(res.test_TABLE[0].val3).to.not.exist;
+    expect(res.test_TABLE[0].id2).to.not.equal(testData.test_table[0].id2);
+    expect(res.test_TABLE[0].owner2).to.not.exist;
 
     expect(res.test_TABLE[1]._id).to.not.equal(testData.test_table[1]._id);
     expect(res.test_TABLE[1].val1).to.equal(testData.test_table[1].val1);
-    expect(res.test_TABLE[1].val2).to.not.equal(testData.test_table[1].val2);
-    expect(res.test_TABLE[1].val3).to.not.exist;
+    expect(res.test_TABLE[1].id2).to.not.equal(testData.test_table[1].id2);
+    expect(res.test_TABLE[1].owner2).to.not.exist;
 
     return;
   });
@@ -207,13 +207,13 @@ describe("Baseconnector Abstract function Tests ", function () {
     expect(res.test_TABLE.length).to.equal(2);
     expect(res.test_TABLE[0]._id).to.not.equal(testData.test_table[0]._id);
     expect(res.test_TABLE[0].val1).to.equal(testData.test_table[0].val1);
-    expect(res.test_TABLE[0].val2).to.not.equal(testData.test_table[0].val2);
-    expect(res.test_TABLE[0].val3).to.not.exist;
+    expect(res.test_TABLE[0].id2).to.not.equal(testData.test_table[0].id2);
+    expect(res.test_TABLE[0].owner2).to.not.exist;
 
     expect(res.test_TABLE[1]._id).to.not.equal(testData.test_table[1]._id);
     expect(res.test_TABLE[1].val1).to.equal(testData.test_table[1].val1);
-    expect(res.test_TABLE[1].val2).to.not.equal(testData.test_table[1].val2);
-    expect(res.test_TABLE[1].val3).to.not.exist;
+    expect(res.test_TABLE[1].id2).to.not.equal(testData.test_table[1].id2);
+    expect(res.test_TABLE[1].owner2).to.not.exist;
 
     return;
   });

@@ -80,7 +80,7 @@ describe("Abstract Accessor Tests ", function () {
         test: "iam joy",
         _owner_id: "256",
       },
-      "_owner_id",
+      "256",
       ["id", "role"],
       ["_owner_id"]
     );
@@ -88,8 +88,8 @@ describe("Abstract Accessor Tests ", function () {
     expect(res.id).to.exist;
     expect(res._owner_id).to.not.exist;
     expect(res.test).to.equal("iam joy");
-    expect(res.role).to.not.equal("admin");
     expect(res.id).to.not.equal("123");
+    expect(res.role).to.not.equal("admin");
     return;
   });
 
@@ -102,7 +102,7 @@ describe("Abstract Accessor Tests ", function () {
         test: "iam joy",
         _owner_id: "256",
       },
-      "_owner_id",
+      "256",
       ["id", "role"],
       ["_owner_id"]
     );

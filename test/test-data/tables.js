@@ -1,7 +1,7 @@
 const data = {
   test_table: [
-    { id: 2, val: "abc", val2: "def", val3: "efg" },
-    { id: 3, val: "hij", val2: "klm", val3: "nop" },
+    { id: 2, val: "abc", id2: "def", owner2: "efg" },
+    { id: 3, val: "hij", id2: "klm", owner2: "nop" },
   ],
   users_table: [
     {
