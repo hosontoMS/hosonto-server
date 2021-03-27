@@ -14,6 +14,7 @@ var flash = require("connect-flash");
 var session = require("express-session");
 var testData = require("../test-data/tables.js");
 // var bcrypt = require("bcrypt-nodejs");
+const { HosontoServer } = require("../../lib/hosonto-server");
 
 // configuration =================
 var config = require("../config");
@@ -226,10 +227,7 @@ app.get("/home", isAuthenticated, (req, res) => {
   res.send({ code: 200, body: "HOME SWEET HOME" });
 }); // Set the default version to latest.
 
-const { HosontoServer } = require("../../lib/hosonto-server");
-var server = HosontoServer();
-server.createServer(app, new MockConnection(null, config), config);
-// var logger = require("../lib/log")(module, "s_messages.log");
+var server = new HosontoServer(app, new MockConnection(null, config), config);
 
 var httpServer = http.createServer(app);
 httpServer.listen(config.get("TEST_PORT"));

@@ -19,6 +19,7 @@ exports = module.exports = async (connString) => {
   var flash = require("connect-flash");
   var session = require("express-session");
   var testData = require("./test-data/tables.js");
+  const { HosontoServer, MongoAccessHelper } = require("../lib/hosonto-server");
 
   // configuration =================
   var config = require("./config");
@@ -68,8 +69,6 @@ exports = module.exports = async (connString) => {
 
     var models = require("./business_logic/modelFactory");
     models.initialize(mongoose);
-    //var dbHelper = require("./server/hosonto/db/util/dbHelper")();
-    let { MongoAccessHelper } = require("../lib/db/mongo/MongoAccessHelper");
     let dbHelper = new MongoAccessHelper(mongoose, {}, config);
 
     var myConn = require("../lib/db/MyConnector.js")(
@@ -206,15 +205,7 @@ exports = module.exports = async (connString) => {
       res.send({ code: 200, body: "HOME SWEET HOME" });
     }); // Set the default version to latest.
 
-    let { HosontoServer } = require("../lib/hosonto-server");
-    let server = HosontoServer();
-    server.createServer(app, myConn.getInstance(), config);
-    // var logger = require("../lib/log")(module, "s_messages.log");
-
-    // log.fatal(new Error("Testing error in logging."));
-    // log.info("Hello world-info");
-    // log.debug("Hello world-debug");
-    // log.log("info", "Hello world-log-info");
+    let server = new HosontoServer(app, myConn.getInstance(), config);
 
     var httpServer = http.createServer(app);
     httpServer.listen(config.get("PORT"));

@@ -27,18 +27,14 @@ nconf
     DATA_BACKEND: "mongodb",
 
     // MongoDB connection string
-    MONGO_URL: "mongodb+srv://annodb:annohosonto786@anno.ywwxt.mongodb.net/",
-    MONGO_COLLECTION: "annoface?retryWrites=true&w=majority",
-
-    MYSQL_USER: "",
-    MYSQL_PASSWORD: "",
-    MYSQL_HOST: "",
+    MONGO_URL: "your-mongo-host",
+    MONGO_COLLECTION: "your-db",
 
     MAX_FIELD_IN_HTTP_REQ: 100,
 
-    // Default Port the HTTP server
-    PORT: 8086,
-    HTTPS_PORT: 44386, //for ssl
+    // Default Port the HTTP/HTTPS server
+    PORT: 8080,
+    HTTPS_PORT: 443,
 
     // Default Port the HTTP server
     TEST_PORT: 8186,
