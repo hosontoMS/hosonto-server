@@ -48,5 +48,8 @@
     "npm-watch": "^0.9.0",
     "sinon": "^9.2.4"
     
+  },
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com"
   }
 }
