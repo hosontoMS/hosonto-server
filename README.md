@@ -17,13 +17,18 @@ const {HosontoServer}  = require("hosonto-server")
 
 app = express()
 
-// myConnectorInstance is the database connector instance you pass for data access requirements
-// the mon
 let server = new HosontoServer(app, myConnectorInstance, configuration)
 
 ```
 
-## Author ⭐c
+####
+
+- myConnectorInstance is the database connector instance you pass for data access requirements
+  [the mongoose connector instance creation can be copied from](lib/db/MyConnector.js)
+- configuration is the relevant configuration options using nconf
+  [a sample can be copied from](test/config/index.js)
+
+## Author ⭐
 
 👤 **Hosonto MS**
 
