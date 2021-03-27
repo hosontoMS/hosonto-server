@@ -1,5 +1,7 @@
 # Welcome to Hosonto server 🎉 🧡 🧚
 
+[![Build Status](https://travis-ci.com/hosontoMS/hosonto-server.svg?branch=master)](https://travis-ci.com/hosontoMS/hosonto-server)
+
 > Hosonto server and API part
 
 ### 🏠 [Homepage](http://hosonto.com)
