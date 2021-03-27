@@ -28,6 +28,12 @@ let server = new HosontoServer(app, myConnectorInstance, configuration)
 - configuration is the relevant configuration options using nconf
   [a sample can be copied from](test/config/index.js)
 
+### Exported Modules
+
+- HosontoServer: The main class to create the server, adding hosonto Event execution and Automation api's
+- MongoDBConnector: The main mongoDB adapter
+- MongoAccessHelper: The security and access controller for mongoDB
+
 ## Author ⭐
 
 👤 **Hosonto MS**
