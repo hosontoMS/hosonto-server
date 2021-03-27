@@ -18,7 +18,7 @@ var log = require("../../../lib/log")(module, config);
 let testData = require("../../test-data/tables");
 const {
   MongoAccessHelper,
-} = require("../../../lib/db/mongo/mongoAccessHelper");
+} = require("../../../lib/db/mongo/MongoAccessHelper");
 let mongoose = require("mongoose");
 let modelDef = require("./testModel.js")(mongoose);
 
